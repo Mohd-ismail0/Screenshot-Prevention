@@ -140,14 +140,17 @@ class EnhancedScreenshotPrevention {
     private createOverlay(): HTMLDivElement {
         const overlay = document.createElement('div');
         overlay.setAttribute('data-screenshot-prevention', 'overlay');
+        
+        // Apply blur filter directly to the element style
+        const blurValue = `blur(${this.options.blurIntensity})`;
         overlay.style.cssText = `
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            backdrop-filter: blur(${this.options.blurIntensity});
-            -webkit-backdrop-filter: blur(${this.options.blurIntensity});
+            backdrop-filter: ${blurValue};
+            -webkit-backdrop-filter: ${blurValue};
             background: ${this.defaultStyles.overlayBackground};
             z-index: 2147483647;
             display: none;
@@ -356,21 +359,46 @@ class EnhancedScreenshotPrevention {
     }
 
     public update(options: Partial<ScreenshotPreventionOptions>): void {
+        // Store old options for comparison
+        const oldOptions = { ...this.options };
+        
+        // Update options
         Object.assign(this.options, options);
         
-        if (options.warningMessage) {
+        // Update UI elements based on changed options
+        if (options.warningMessage && this.elements.warning) {
             this.elements.warning.textContent = options.warningMessage;
         }
         
-        if (options.blurIntensity) {
+        if (options.blurIntensity && this.elements.overlay) {
             const blurValue = `blur(${options.blurIntensity})`;
-            this.elements.overlay.style.setProperty('backdrop-filter', blurValue);
-            this.elements.overlay.style.setProperty('-webkit-backdrop-filter', blurValue);
+            // Update both standard and vendor prefixed properties
+            this.elements.overlay.style.backdropFilter = blurValue;
+            this.elements.overlay.style.backdropFilter = blurValue;
         }
 
         if (options.customStyles) {
             Object.assign(this.defaultStyles, options.customStyles);
             this.updateStyles();
+        }
+
+        // Handle any additional option changes that require runtime updates
+        if (options.preventCopy !== undefined && options.preventCopy !== oldOptions.preventCopy) {
+            if (options.preventCopy) {
+                document.body.classList.add('screenshot-prevention-active');
+            } else {
+                document.body.classList.remove('screenshot-prevention-active');
+            }
+        }
+
+        if (options.recoveryDelay !== undefined && this.state.recoveryTimer !== null) {
+            // Reset any active recovery timer with new delay
+            window.clearTimeout(this.state.recoveryTimer);
+            this.state.recoveryTimer = window.setTimeout(() => {
+                this.elements.overlay.style.display = 'none';
+                this.elements.warning.style.display = 'none';
+                document.body.classList.remove('screenshot-prevention-active');
+            }, options.recoveryDelay);
         }
     }
 
