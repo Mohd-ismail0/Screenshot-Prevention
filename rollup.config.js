@@ -6,16 +6,20 @@ export default {
     {
       file: 'dist/screenshot-prevention.js',
       format: 'umd',
-      name: 'ScreenshotPrevention'
+      name: 'ScreenshotPrevention',
+      sourcemap: true
     },
     {
       file: 'dist/screenshot-prevention.esm.js',
-      format: 'es'
+      format: 'es',
+      sourcemap: true
     }
   ],
   plugins: [
     typescript({
-      tsconfig: './tsconfig.json'
+      tsconfig: './tsconfig.json',
+      declaration: true,
+      declarationDir: 'dist/types'
     })
   ]
 };
