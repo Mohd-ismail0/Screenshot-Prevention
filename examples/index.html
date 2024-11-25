@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screenshot Prevention Demo</title>
+</head>
+<body>
+    <h1>Screenshot Prevention Demo</h1>
+    <p>Try to take a screenshot of this page (Print Screen, Cmd+Shift+3, etc)</p>
+    <p>The page will blur and show a warning message.</p>
+    
+    <div style="margin: 20px; padding: 20px; border: 1px solid #ccc;">
+        <h2>Protected Content</h2>
+        <p>This content is protected from screenshots and screen recording.</p>
+        <img src="https://via.placeholder.com/300" alt="Protected Image">
+    </div>
+
+    <script type="module">
+        import ScreenshotPrevention from '../dist/screenshot-prevention.esm.js';
+        
+        const prevention = new ScreenshotPrevention({
+            blurIntensity: '15px',
+            warningMessage: 'Screenshots are not allowed!',
+            debug: true,
+            onAttempt: (details) => {
+                console.log('Screenshot attempted:', details);
+            }
+        });
+    </script>
+</body>
+</html>
